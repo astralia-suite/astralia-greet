@@ -16,6 +16,10 @@ cmd_build() {
 	ninja -C build -j "${ASTRALIA_GREET_BUILD_JOBS:-4}"
 }
 
+cmd_setup() {
+	sudo pacman -Syu --needed gcc meson ninja pkgconf libdrm cairo pango fontconfig libxkbcommon libxkbcommon-x11 libinput systemd systemd-libs libjpeg-turbo libpng libxcb seatd pam xorg-server xorg-xauth
+}
+
 cmd_default() { cmd_build; meson test -C build --print-errorlogs; }
 cmd_test() {
 	cmd_build
@@ -46,7 +50,8 @@ cmd_uninstall() {
 main() {
 	local cmd="${1:-default}"
 	case "$cmd" in
-		default|test|install|uninstall) "cmd_$cmd" ;;
+		--setup) cmd_setup ;;
+		default|setup|test|install|uninstall) "cmd_$cmd" ;;
 		*) echo "unknown command: $cmd" >&2; exit 2 ;;
 	esac
 }
