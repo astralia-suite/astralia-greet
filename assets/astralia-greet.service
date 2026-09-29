@@ -1,0 +1,15 @@
+[Unit]
+Description=Astralia Greet display manager
+Documentation=man:astralia-greet(1)
+Conflicts=getty@tty1.service
+After=systemd-user-sessions.service getty@tty1.service plymouth-quit.service systemd-logind.service
+StartLimitIntervalSec=30
+StartLimitBurst=2
+
+[Service]
+ExecStart=/usr/bin/astralia-greet
+Restart=always
+IgnoreSIGPIPE=no
+
+[Install]
+Alias=display-manager.service
