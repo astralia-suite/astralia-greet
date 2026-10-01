@@ -77,7 +77,7 @@ bool WindowService::open() {
     height_ = screen->height_in_pixels;
     window_ = xcb_generate_id(connection_);
     std::uint32_t mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
-    std::array<std::uint32_t, 2> values{screen->black_pixel, XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_KEY_RELEASE | XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_STRUCTURE_NOTIFY};
+    std::array<std::uint32_t, 2> values{screen->black_pixel, XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_KEY_RELEASE | XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_STRUCTURE_NOTIFY};
     xcb_create_window(connection_, screen->root_depth, window_, screen->root, 0, 0, static_cast<std::uint16_t>(width_), static_cast<std::uint16_t>(height_), 0, XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual, mask, values.data());
     std::string_view title = config::window::title;
     xcb_change_property(connection_, XCB_PROP_MODE_REPLACE, window_, XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8, static_cast<std::uint32_t>(title.size()), title.data());
@@ -216,6 +216,13 @@ void WindowService::handle(xcb_generic_event_t *event) {
         auto *button = reinterpret_cast<xcb_button_press_event_t *>(event);
         if (button->detail == XCB_BUTTON_INDEX_1 && on_click) {
             on_click(button->event_x, button->event_y);
+        }
+        break;
+    }
+    case XCB_MOTION_NOTIFY: {
+        auto *motion = reinterpret_cast<xcb_motion_notify_event_t *>(event);
+        if (on_pointer_motion) {
+            on_pointer_motion(motion->event_x, motion->event_y);
         }
         break;
     }

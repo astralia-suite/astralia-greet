@@ -46,7 +46,7 @@ Standalone display manager (SDDM/LightDM class). One root daemon renders the log
 - `text`: `pangocairo` measuring and drawing with ellipsizing, `text_font` (`config::font_family` at a point size), `icon_font` (Tabler font description for a pixel size).
 - `dropdown`: `Dropdown` shared by `session_picker` and `user_menu`: pill button (label + `chevron_up` on a pill, radius and padding `height / 2`), menu placement (opens upward when it would overflow), menu drawing and hit testing.- `fonts`: `register_fonts` adds the bundled fonts to fontconfig (`FcConfigAppFontAddFile`), installed dir first, then the source tree.
 - `icons.h`: `render::icon` Tabler codepoints (subset of `astralia-shell-i3/src/core/icons.h`) and `font_family`.
-- `cursor` — draws the arrow into the hardware cursor buffer.
+- `cursor` — copies `left_ptr` from the `config::display::cursor_theme` XCursor theme (`libXcursor`) into the hardware cursor buffer and returns its hotspot; falls back to a drawn arrow.
 
 ### `src/service/` — system concerns, never draw UI
 

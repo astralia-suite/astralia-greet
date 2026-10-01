@@ -93,7 +93,7 @@ bool DisplayService::open(std::string_view output) {
         }
         cursor_ok_ = create_buffer(cursor_, cursor_size, cursor_size, false);
         if (cursor_ok_) {
-            render::draw_cursor(cursor_.map, cursor_size, static_cast<int>(cursor_.pitch));
+            cursor_hot_ = render::draw_cursor(cursor_.map, cursor_size, static_cast<int>(cursor_.pitch));
         }
         if (!modeset()) {
             close();
@@ -228,7 +228,7 @@ void DisplayService::show_cursor() {
         return;
     }
     cursor_shown_ = true;
-    drmModeMoveCursor(fd_, crtc_, cursor_x_, cursor_y_);
+    drmModeMoveCursor(fd_, crtc_, cursor_x_ - cursor_hot_.x, cursor_y_ - cursor_hot_.y);
 }
 
 int DisplayService::width() const {
@@ -270,7 +270,7 @@ void DisplayService::move_cursor(int x, int y) {
         show_cursor();
         return;
     }
-    drmModeMoveCursor(fd_, crtc_, x, y);
+    drmModeMoveCursor(fd_, crtc_, x - cursor_hot_.x, y - cursor_hot_.y);
 }
 
 bool DisplayService::drop_master() {

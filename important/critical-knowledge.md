@@ -57,9 +57,15 @@
 - `load_image` picks the decoder from the magic bytes, not the extension: the old `wallpaper.png` was a JPEG. Interlaced PNGs cannot be reduced row by row and fall back to the full-size cairo decode.
 - PNG alpha is premultiplied per pixel before averaging, since cairo `ARGB32` is premultiplied; a PNG without alpha or `tRNS` becomes `RGB24`.
 - Estimated X201 costs: idle is two `timerfd` wakes per minute (`clock`, `date`); a view switch is a full 4 MB background paint (plus the `login_dim` fill in the login view, which replaced a second pre-dimmed 4 MB surface) and a 4 MB copy (a few ms); a keystroke repaints only the field. `clock_panel` has no tick of its own: the `clock`/`date` damage rects intersect it, so `flush` repaints it clipped under them (one small alpha fill per tick).
+- Pointer motion calls `Module::hover` on every module; it returns `true` only when the hovered element changed (`power` keeps the hovered slot), so moving the pointer repaints nothing until it enters or leaves an icon.
 - `render::draw_text` must end with `cairo_new_path`: `pango_cairo_show_layout` leaves a current point, and the next `cairo_arc` would draw a line from it.
 - Timers use `CLOCK_BOOTTIME`, so the clock catches up immediately after suspend.
 - `--preview` runs the same modules without VT, DRM or input and needs no root. Use `./build.sh test` (writes `preview.png` in the project root, then opens the test window) after any layout or style change.
+
+## Cursor
+
+- The DRM cursor buffer is 64x64; `XcursorLibraryLoadImage` needs no X connection, and its pixels are premultiplied ARGB like the buffer, so rows are copied as is (cropped at 64). `drmModeMoveCursor` places the buffer's top-left, so `DisplayService` subtracts the theme's hotspot.
+- `--window` uses the X server's cursor and `--preview` draws none, so only the DRM path shows the theme.
 
 ## Test window
 

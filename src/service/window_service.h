@@ -37,6 +37,7 @@ class WindowService {
 
     std::function<void(const KeyEvent &)> on_key;
     std::function<void(int, int)> on_click;
+    std::function<void(int, int)> on_pointer_motion;
     std::function<void(int, int)> on_resize;
     std::function<void(const render::Rect &)> on_expose;
     std::function<void()> on_modifiers;

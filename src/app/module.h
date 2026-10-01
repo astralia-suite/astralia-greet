@@ -26,6 +26,10 @@ class Module {
         return false;
     }
 
+    virtual bool hover(int, int, const GreeterState &) {
+        return false;
+    }
+
     virtual std::optional<std::chrono::milliseconds> next_tick() const {
         return std::nullopt;
     }

@@ -19,6 +19,7 @@ xcb_dep        = dependency('xcb')
 cairo_xcb_dep  = dependency('cairo-xcb')
 xkbcommon_x11_dep = dependency('xkbcommon-x11')
 libseat_dep    = dependency('libseat')
+xcursor_dep    = dependency('xcursor')
 pam_dep        = meson.get_compiler('cpp').find_library('pam')
 
 astralia_greet_inc      = include_directories('src')
@@ -48,6 +49,7 @@ astralia_greet_deps = [
   cairo_xcb_dep,
   xkbcommon_x11_dep,
   libseat_dep,
+  xcursor_dep,
   pam_dep,
 ]
 

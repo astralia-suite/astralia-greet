@@ -1,6 +1,7 @@
 #include "modules/power.h"
 
 #include <algorithm>
+#include <utility>
 
 #include "config/power_config.h"
 
@@ -67,7 +68,7 @@ void Power::draw(cairo_t *cr, const app::GreeterState &state) {
             break;
         }
         if (icon) {
-            render::draw_text(cr, icon, font_, color_, slot(i), render::TextAlign::Center);
+            render::draw_text(cr, icon, font_, hovered_ == i ? config::power::hover_color : color_, slot(i), render::TextAlign::Center);
         }
     }
 }
@@ -76,13 +77,25 @@ bool Power::click(int x, int y, app::GreeterState &state) {
     if (!visible(state)) {
         return false;
     }
-    for (std::size_t i = 0; i < actions_.size(); ++i) {
-        if (slot(i).padded(spacing_ / 2).contains(x, y)) {
-            state.request = actions_[i];
-            return true;
-        }
+    if (auto index = slot_at(x, y)) {
+        state.request = actions_[*index];
+        return true;
     }
     return false;
+}
+
+bool Power::hover(int x, int y, const app::GreeterState &state) {
+    auto index = visible(state) ? slot_at(x, y) : std::nullopt;
+    return std::exchange(hovered_, index) != index;
+}
+
+std::optional<std::size_t> Power::slot_at(int x, int y) const {
+    for (std::size_t i = 0; i < actions_.size(); ++i) {
+        if (slot(i).padded(spacing_ / 2).contains(x, y)) {
+            return i;
+        }
+    }
+    return std::nullopt;
 }
 
 } // namespace modules

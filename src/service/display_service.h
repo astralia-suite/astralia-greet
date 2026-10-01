@@ -7,6 +7,7 @@
 #include <xf86drmMode.h>
 
 #include "render/canvas.h"
+#include "render/cursor.h"
 #include "render/layout.h"
 
 #include "service/seat_service.h"
@@ -56,6 +57,7 @@ class DisplayService {
     bool cursor_shown_ = false;
     int cursor_x_ = 0;
     int cursor_y_ = 0;
+    render::Hotspot cursor_hot_;
 };
 
 } // namespace service

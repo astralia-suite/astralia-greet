@@ -55,6 +55,7 @@ class Greeter {
     void show_login();
     void show_clock();
     void handle_click(int x, int y);
+    void handle_motion(int x, int y);
     void step(int direction);
     void after_input(std::size_t previous_user);
     void process_request();

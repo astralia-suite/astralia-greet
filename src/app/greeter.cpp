@@ -126,7 +126,10 @@ bool Greeter::start_native() {
     }
     input_.on_key = [this](const service::KeyEvent &key) { handle_key(key); };
     input_.on_click = [this](int x, int y) { handle_click(x, y); };
-    input_.on_pointer_motion = [this](int x, int y) { display_.move_cursor(x, y); };
+    input_.on_pointer_motion = [this](int x, int y) {
+        display_.move_cursor(x, y);
+        handle_motion(x, y);
+    };
     input_.set_bounds(display_.width(), display_.height());
     return input_.open(settings_.general);
 }
@@ -137,6 +140,7 @@ bool Greeter::start_window() {
     }
     window_.on_key = [this](const service::KeyEvent &key) { handle_key(key); };
     window_.on_click = [this](int x, int y) { handle_click(x, y); };
+    window_.on_pointer_motion = [this](int x, int y) { handle_motion(x, y); };
     window_.on_resize = [this](int width, int height) {
         if (resize(width, height)) {
             damage_all();
@@ -320,6 +324,18 @@ void Greeter::handle_click(int x, int y) {
         state_.user_menu_open = false;
     }
     after_input(previous_user);
+}
+
+void Greeter::handle_motion(int x, int y) {
+    if (!active_ || worker_ > 0) {
+        return;
+    }
+    for (auto &module : modules_) {
+        if (module->hover(x, y, state_)) {
+            damage(module->bounds());
+        }
+    }
+    flush();
 }
 
 void Greeter::after_input(std::size_t previous_user) {

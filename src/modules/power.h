@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -19,9 +20,11 @@ class Power : public app::Module {
     void draw(cairo_t *cr, const app::GreeterState &state) override;
     bool visible(const app::GreeterState &state) const override;
     bool click(int x, int y, app::GreeterState &state) override;
+    bool hover(int x, int y, const app::GreeterState &state) override;
 
   private:
     render::Rect slot(std::size_t index) const;
+    std::optional<std::size_t> slot_at(int x, int y) const;
 
     config::WidgetGeometry geometry_;
     render::Rect rect_;
@@ -30,6 +33,7 @@ class Power : public app::Module {
     int spacing_ = 0;
     std::string font_;
     config::Color color_;
+    std::optional<std::size_t> hovered_;
 };
 
 } // namespace modules
