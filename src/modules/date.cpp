@@ -11,7 +11,7 @@ Date::Date()
     : geometry_(config::date::geometry), format_(config::date::format), font_(render::text_font(config::date::font_size)), color_(config::fg), align_(render::TextAlign::Center) {}
 
 void Date::layout(int width, int height) {
-    rect_ = render::place(geometry_, width, height);
+    rect_ = render::place(geometry_, width, height, render::ui_scale(width, height));
 }
 
 render::Rect Date::bounds() const {

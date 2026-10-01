@@ -1,6 +1,7 @@
 #include "render/layout.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 
 namespace render {
@@ -120,10 +121,28 @@ std::vector<Rect> merge_overlapping(std::vector<Rect> rects) {
     return rects;
 }
 
-Rect place(const config::WidgetGeometry &geometry, int screen_width, int screen_height) {
-    int x = align(column(geometry.anchor), screen_width, geometry.width);
-    int y = align(row(geometry.anchor), screen_height, geometry.height);
-    return {x + geometry.x, y + geometry.y, geometry.width, geometry.height};
+double ui_scale(int screen_width, int screen_height) {
+    return std::min(static_cast<double>(screen_width) / config::reference_width, static_cast<double>(screen_height) / config::reference_height);
+}
+
+int scaled(int value, double scale) {
+    return static_cast<int>(std::lround(value * scale));
+}
+
+double scaled(double value, double scale) {
+    return value * scale;
+}
+
+double line_width(double width, double scale) {
+    return std::max(1.0, width * scale);
+}
+
+Rect place(const config::WidgetGeometry &geometry, int screen_width, int screen_height, double scale) {
+    int width = scaled(geometry.width, scale);
+    int height = scaled(geometry.height, scale);
+    int x = align(column(geometry.anchor), screen_width, width);
+    int y = align(row(geometry.anchor), screen_height, height);
+    return {x + scaled(geometry.x, scale), y + scaled(geometry.y, scale), width, height};
 }
 
 Placement fit_image(int image_width, int image_height, int area_width, int area_height, config::BackgroundMode mode) {

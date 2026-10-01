@@ -15,6 +15,8 @@
 #include "core/log.h"
 #include "core/strings.h"
 
+#include "render/text.h"
+
 namespace app {
 
 namespace {
@@ -168,6 +170,7 @@ bool Greeter::resize(int width, int height) {
         return false;
     }
     canvas_ = std::move(canvas);
+    render::set_text_scale(render::ui_scale(width, height));
     for (auto &module : modules_) {
         module->layout(width, height);
     }
@@ -703,6 +706,7 @@ bool render_preview(const config::Settings &settings, const std::filesystem::pat
     auto state = initial_state(settings, users, sessions, store);
     state.password = "preview";
     auto modules = create_modules(settings.power);
+    render::set_text_scale(render::ui_scale(width, height));
     for (auto &module : modules) {
         module->layout(width, height);
         cairo_save(canvas.context());

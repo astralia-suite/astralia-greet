@@ -18,15 +18,19 @@ Password::Password()
     : geometry_(config::password::geometry), font_(render::text_font(config::password::font_size)), mask_(config::password::mask), placeholder_(config::password::placeholder), busy_text_(config::password::busy_text), text_color_(config::fg), fill_(config::field), border_(config::field_border), focus_border_(config::accent), muted_(config::muted) {
     std::error_code ec;
     std::filesystem::path path = std::filesystem::exists(config::password::echo_image, ec) ? config::password::echo_image : config::password::source_echo_image;
-    if (auto image = render::load_image(path)) {
-        echo_ = render::scaled_image(image.get(), config::password::echo_size);
-    } else {
+    echo_image_ = render::load_image(path);
+    if (!echo_image_) {
         core::warn("cannot load password echo image {}", path.string());
     }
 }
 
 void Password::layout(int width, int height) {
-    rect_ = render::place(geometry_, width, height);
+    scale_ = render::ui_scale(width, height);
+    rect_ = render::place(geometry_, width, height, scale_);
+    echo_size_ = std::max(1, render::scaled(config::password::echo_size, scale_));
+    if (echo_image_) {
+        echo_ = render::scaled_image(echo_image_.get(), echo_size_);
+    }
 }
 
 render::Rect Password::bounds() const {
@@ -42,15 +46,16 @@ void Password::draw(cairo_t *cr, const app::GreeterState &state) {
         return;
     }
     bool focused = state.focus == app::Focus::Password;
-    double inset = config::password::focus_border_width;
+    double focus_border = render::line_width(config::password::focus_border_width, scale_);
+    double inset = focus_border;
     render::rounded_rect(cr, rect_.x + inset, rect_.y + inset, rect_.width - inset * 2, rect_.height - inset * 2, rect_.height / 2.0 - inset);
     render::set_color(cr, fill_);
     cairo_fill_preserve(cr);
     render::set_color(cr, focused ? focus_border_ : border_);
-    cairo_set_line_width(cr, focused ? config::password::focus_border_width : config::password::border_width);
+    cairo_set_line_width(cr, focused ? focus_border : render::line_width(config::password::border_width, scale_));
     cairo_stroke(cr);
 
-    auto box = rect_.padded(-12);
+    auto box = rect_.padded(-render::scaled(12, scale_));
     if (state.busy) {
         render::draw_text(cr, busy_text_, font_, muted_, box, render::TextAlign::Center);
         return;
@@ -71,7 +76,7 @@ void Password::draw(cairo_t *cr, const app::GreeterState &state) {
     double row_end = 0.0;
     double row_height = 0.0;
     if (echo_) {
-        int size = config::password::echo_size;
+        int size = echo_size_;
         auto shown = std::min(count, static_cast<std::size_t>(std::max(1, box.width / size)));
         double width = static_cast<double>(shown * size);
         double x = box.center_x() - width / 2.0;
@@ -93,9 +98,9 @@ void Password::draw(cairo_t *cr, const app::GreeterState &state) {
         row_height = size.height;
     }
     if (focused) {
-        double x = std::min(row_end + config::password::caret_gap, static_cast<double>(box.right()));
+        double x = std::min(row_end + render::scaled(config::password::caret_gap, scale_), static_cast<double>(box.right()));
         render::set_color(cr, focus_border_);
-        cairo_set_line_width(cr, 1.5);
+        cairo_set_line_width(cr, render::line_width(1.5, scale_));
         cairo_move_to(cr, x, rect_.center_y() - row_height / 2.0);
         cairo_line_to(cr, x, rect_.center_y() + row_height / 2.0);
         cairo_stroke(cr);

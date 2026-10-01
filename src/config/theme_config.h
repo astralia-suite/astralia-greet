@@ -33,6 +33,10 @@ struct WidgetGeometry {
     int height = 0;
 };
 
+// Reference screen, every size in src/config/ is designed for it and scaled to the real screen
+inline constexpr int reference_width = 1920;
+inline constexpr int reference_height = 1200;
+
 // Palette, mirrors astralia-shell-i3/src/core/palette.h: text, text_alpha65, accent, critical, text_alpha08, text_alpha20
 inline constexpr Color fg{240 / 255.0, 236 / 255.0, 249 / 255.0, 1.0};
 inline constexpr Color muted{240 / 255.0, 236 / 255.0, 249 / 255.0, 166 / 255.0};

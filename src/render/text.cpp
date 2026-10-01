@@ -34,6 +34,10 @@ PangoAlignment to_pango(TextAlign align) {
 
 } // namespace
 
+void set_text_scale(double scale) {
+    pango_cairo_font_map_set_resolution(PANGO_CAIRO_FONT_MAP(pango_cairo_font_map_get_default()), 96.0 * scale);
+}
+
 std::string text_font(int size, bool bold) {
     return std::format("{}{} {}", config::font_family, bold ? " Bold" : "", size);
 }

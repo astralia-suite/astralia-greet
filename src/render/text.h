@@ -19,6 +19,7 @@ struct TextSize {
     int height = 0;
 };
 
+void set_text_scale(double scale);
 std::string text_font(int size, bool bold = false);
 std::string icon_font(int pixel_size);
 TextSize measure_text(cairo_t *cr, std::string_view text, std::string_view font);

@@ -100,4 +100,5 @@
 
 - There is no theme or config file: every value lives in `src/config/`, and changing the look means editing a header and rebuilding. Geometry `x`/`y` are always added to the anchored position (positive = right/down).
 - The palette in `theme_config.h`, the background colors, hint `warn_color` and `corner_radius` values mirror `astralia-shell-i3/src/core/palette.h` (`palette` and `metrics`); update both together.
-- Font sizes are absolute Pango points (no multipliers), so at 96 dpi a size of 12 draws at about 16 px.
+- Every size in `src/config/` is designed for the reference screen `config::reference_width`x`reference_height` (1920x1200) and multiplied by `render::ui_scale` = `min(width / 1920, height / 1200)` (1280x800 → 0.667, 1920x1080 → 0.9, 7680x2160 → 1.8). `render::place` scales geometry; every other pixel value (icon sizes, gaps, radii, item heights, echo size, padding) must be scaled in the module's `layout`, never in its constructor. Line widths go through `render::line_width` (min 1 px).
+- Font sizes are Pango points: `render::set_text_scale` sets the default font map resolution to `96 * scale` before the module layouts (`Greeter::resize`, `render_preview`), so a size of 12 draws at about 16 px on the reference screen. `icon_font` takes pixels, which the resolution does not touch, so callers pass scaled sizes.

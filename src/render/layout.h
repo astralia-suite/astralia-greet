@@ -32,7 +32,11 @@ struct Placement {
 };
 
 std::vector<Rect> merge_overlapping(std::vector<Rect> rects);
-Rect place(const config::WidgetGeometry &geometry, int screen_width, int screen_height);
+double ui_scale(int screen_width, int screen_height);
+int scaled(int value, double scale);
+double scaled(double value, double scale);
+double line_width(double width, double scale);
+Rect place(const config::WidgetGeometry &geometry, int screen_width, int screen_height, double scale);
 Placement fit_image(int image_width, int image_height, int area_width, int area_height, config::BackgroundMode mode);
 
 } // namespace render

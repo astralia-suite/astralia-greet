@@ -22,7 +22,10 @@ class Password : public app::Module {
 
   private:
     config::WidgetGeometry geometry_;
+    render::SurfacePtr echo_image_;
     render::SurfacePtr echo_;
+    double scale_ = 1.0;
+    int echo_size_ = 0;
     render::Rect rect_;
     std::string font_;
     std::string mask_;

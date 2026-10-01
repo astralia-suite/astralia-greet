@@ -34,16 +34,16 @@ Standalone display manager (SDDM/LightDM class). One root daemon renders the log
 ### `src/config/`: constants and plain data only, no config files are read
 
 - `greet_config.h`: paths (including the installed and source font dirs), bundled font files, system constants, `config::Settings` and its sections (the struct defaults are the settings).
-- `theme_config.h`: `Color`, `Anchor`, `BackgroundMode`, `WidgetGeometry`, the palette and the text font.
+- `theme_config.h`: reference screen size, `Color`, `Anchor`, `BackgroundMode`, `WidgetGeometry`, the palette and the text font.
 - `<module>_config.h`: per-module geometry, point sizes, colors and text (`background`, `date`, `clock`, `clock_panel`, `password`, `session_picker`, `user_menu`, `hint`, `power`).
 - `window_config.h` — test window title and messages.
 
 ### `src/render/`
 
-- `layout` — `Rect` (`united` bounding box), `merge_overlapping` damage rects, anchor placement (`place`), image fitting (`fit_image`).
+- `layout` — `Rect` (`united` bounding box), `merge_overlapping` damage rects, `ui_scale` (screen size against the 1920x1200 reference), `scaled`/`line_width`, scaled anchor placement (`place`), image fitting (`fit_image`).
 - `canvas` — `Canvas` back buffer (`RGB24`, matches DRM `XRGB8888`), `SurfacePtr`, `set_color`, `rounded_rect`.
 - `image` — PNG (`libpng`, interlaced PNGs through cairo) and JPEG (`libjpeg`) decoding, `load_image` with an optional minimum size (PNG integer box reduction, JPEG DCT scaling), `paint_image`, `scaled_image` (square `ARGB32` copy, scaled once).
-- `text`: `pangocairo` measuring and drawing with ellipsizing, `text_font` (`config::font_family` at a point size), `icon_font` (Tabler font description for a pixel size).
+- `text`: `set_text_scale` (font map resolution), `pangocairo` measuring and drawing with ellipsizing, `text_font` (`config::font_family` at a point size), `icon_font` (Tabler font description for a pixel size).
 - `dropdown`: `Dropdown` shared by `session_picker` and `user_menu`: pill button (label + `chevron_up` on a pill, radius and padding `height / 2`), menu placement (opens upward when it would overflow), menu drawing and hit testing.- `fonts`: `register_fonts` adds the bundled fonts to fontconfig (`FcConfigAppFontAddFile`), installed dir first, then the source tree.
 - `icons.h`: `render::icon` Tabler codepoints (subset of `astralia-shell-i3/src/core/icons.h`) and `font_family`.
 - `cursor` — copies `left_ptr` from the `config::display::cursor_theme` XCursor theme (`libXcursor`) into the hardware cursor buffer and returns its hotspot; falls back to a drawn arrow.

@@ -21,18 +21,19 @@ Power::Power(const config::PowerSettings &power) {
     if (power.allow_poweroff) {
         actions_.push_back(app::Request::PowerOff);
     }
-    icon_size_ = defaults::icon_size;
-    font_ = render::icon_font(icon_size_);
-    spacing_ = defaults::spacing;
     color_ = config::muted;
     auto count = static_cast<int>(actions_.size());
     geometry_ = defaults::geometry;
-    geometry_.width = count * icon_size_ + std::max(0, count - 1) * spacing_;
-    geometry_.height = icon_size_;
+    geometry_.width = count * defaults::icon_size + std::max(0, count - 1) * defaults::spacing;
+    geometry_.height = defaults::icon_size;
 }
 
 void Power::layout(int width, int height) {
-    rect_ = render::place(geometry_, width, height);
+    auto scale = render::ui_scale(width, height);
+    rect_ = render::place(geometry_, width, height, scale);
+    icon_size_ = render::scaled(config::power::icon_size, scale);
+    spacing_ = render::scaled(config::power::spacing, scale);
+    font_ = render::icon_font(icon_size_);
 }
 
 render::Rect Power::bounds() const {

@@ -3,14 +3,22 @@
 #include "test/check.h"
 
 void test_layout() {
-    auto center = render::place({config::Anchor::Center, 0, 20, 300, 46}, 1280, 800);
+    auto center = render::place({config::Anchor::Center, 0, 20, 300, 46}, 1280, 800, 1.0);
     CHECK(center.x == 490 && center.y == 397 && center.width == 300 && center.height == 46);
-    auto corner = render::place({config::Anchor::BottomRight, -28, -28, 100, 30}, 1280, 800);
+    auto corner = render::place({config::Anchor::BottomRight, -28, -28, 100, 30}, 1280, 800, 1.0);
     CHECK(corner.x == 1152 && corner.y == 742);
-    auto top = render::place({config::Anchor::Top, 0, 80, 560, 150}, 1280, 800);
+    auto top = render::place({config::Anchor::Top, 0, 80, 560, 150}, 1280, 800, 1.0);
     CHECK(top.x == 360 && top.y == 80);
-    auto left = render::place({config::Anchor::Left, 10, 0, 100, 100}, 1280, 800);
+    auto left = render::place({config::Anchor::Left, 10, 0, 100, 100}, 1280, 800, 1.0);
     CHECK(left.x == 10 && left.y == 350);
+
+    CHECK(render::ui_scale(1920, 1200) == 1.0);
+    CHECK(render::ui_scale(1920, 1080) == 0.9);
+    CHECK(render::ui_scale(7680, 2160) == 1.8);
+    CHECK(render::ui_scale(1600, 1200) == 1600.0 / 1920);
+    auto small = render::place({config::Anchor::BottomRight, -30, -30, 300, 60}, 1280, 800, 2.0 / 3.0);
+    CHECK(small.width == 200 && small.height == 40 && small.x == 1060 && small.y == 740);
+    CHECK(render::line_width(1.0, 0.64) == 1.0 && render::line_width(2.0, 1.8) == 3.6);
 
     render::Rect a{0, 0, 10, 10};
     render::Rect b{5, 5, 10, 10};

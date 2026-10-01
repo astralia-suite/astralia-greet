@@ -15,6 +15,7 @@ class ClockPanel : public app::Module {
 
   private:
     render::Rect rect_;
+    double scale_ = 1.0;
 };
 
 } // namespace modules

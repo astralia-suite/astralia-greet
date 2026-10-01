@@ -35,7 +35,7 @@ Clock::Clock()
 }
 
 void Clock::layout(int width, int height) {
-    rect_ = render::place(geometry_, width, height);
+    rect_ = render::place(geometry_, width, height, render::ui_scale(width, height));
 }
 
 render::Rect Clock::bounds() const {

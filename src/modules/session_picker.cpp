@@ -1,5 +1,6 @@
 #include "modules/session_picker.h"
 
+#include <algorithm>
 #include <vector>
 
 #include "config/session_picker_config.h"
@@ -22,14 +23,7 @@ std::string session_label(const service::Session &session) {
 SessionPicker::SessionPicker() {
     namespace defaults = config::session_picker;
     dropdown_.font = render::text_font(defaults::font_size);
-    dropdown_.indicator_font = render::icon_font(defaults::indicator_size);
-    dropdown_.indicator_size = defaults::indicator_size;
-    dropdown_.indicator_gap = defaults::indicator_gap;
     dropdown_.max_items = defaults::max_items;
-    dropdown_.item_height = defaults::item_height;
-    dropdown_.menu_gap = defaults::menu_gap;
-    dropdown_.corner_radius = defaults::corner_radius;
-    dropdown_.border_width = defaults::border_width;
     dropdown_.color = config::muted;
     dropdown_.focus_color = config::accent;
     dropdown_.menu_color = config::field;
@@ -38,7 +32,16 @@ SessionPicker::SessionPicker() {
 }
 
 void SessionPicker::layout(int width, int height) {
-    rect_ = render::place(config::session_picker::geometry, width, height);
+    namespace defaults = config::session_picker;
+    auto scale = render::ui_scale(width, height);
+    rect_ = render::place(defaults::geometry, width, height, scale);
+    dropdown_.indicator_size = render::scaled(defaults::indicator_size, scale);
+    dropdown_.indicator_font = render::icon_font(dropdown_.indicator_size);
+    dropdown_.indicator_gap = render::scaled(defaults::indicator_gap, scale);
+    dropdown_.item_height = std::max(1, render::scaled(defaults::item_height, scale));
+    dropdown_.menu_gap = render::scaled(defaults::menu_gap, scale);
+    dropdown_.corner_radius = render::scaled(defaults::corner_radius, scale);
+    dropdown_.border_width = render::line_width(defaults::border_width, scale);
     screen_height_ = height;
 }
 
