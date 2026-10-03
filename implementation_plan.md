@@ -23,7 +23,7 @@ Goal: the greeter looks the same, in proportion, on every screen from 1366x768 t
 - `[MODIFY] src/modules/power.{h,cpp}` — icon size, spacing, font and width computed in `layout`.
 - `[MODIFY] src/modules/{session_picker,user_menu}.cpp` — fill the `Dropdown` pixel fields (fonts, item height, gaps, radius, border) in `layout`.
 - `[MODIFY] test/render/test_layout.cpp` — existing `place` checks at scale 1, plus `ui_scale` and a scaled `place`.
-- `[MODIFY] important/critical-knowledge.md`, `important/index.md` — document the reference screen and scaling.
+- `[MODIFY] important/knowledge.md`, `important/index.md` — document the reference screen and scaling.
 
 ## Out of scope
 

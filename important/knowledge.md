@@ -1,4 +1,4 @@
-# `astralia-greet` critical knowledge
+# `astralia-greet` knowledge
 
 ## Build
 
