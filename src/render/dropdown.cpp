@@ -42,9 +42,13 @@ void Dropdown::draw_button(cairo_t *cr, const Rect &button, std::string_view lab
     int width = std::min(measure_text(cr, label, font).width, limit);
     int content = width + indicator_gap + indicator_size;
     int x = static_cast<int>(button.center_x()) - content / 2;
-    rounded_rect(cr, x - padding, button.y, content + padding * 2, button.height, button.height / 2.0);
+    double inset = border_width / 2.0;
+    rounded_rect(cr, x - padding + inset, button.y + inset, content + padding * 2 - inset * 2, button.height - inset * 2, button.height / 2.0 - inset);
     set_color(cr, pill_color);
-    cairo_fill(cr);
+    cairo_fill_preserve(cr);
+    set_color(cr, menu_border);
+    cairo_set_line_width(cr, border_width);
+    cairo_stroke(cr);
     draw_text(cr, label, font, text_color, {x, button.y, width, button.height}, TextAlign::Left);
     draw_text(cr, icon::chevron_up, indicator_font, text_color, {x + width + indicator_gap, button.y, indicator_size, button.height}, TextAlign::Center);
 }
@@ -52,7 +56,7 @@ void Dropdown::draw_button(cairo_t *cr, const Rect &button, std::string_view lab
 void Dropdown::draw_menu(cairo_t *cr, const Rect &menu, const std::vector<std::string> &labels, std::size_t index) const {
     double inset = border_width / 2.0;
     rounded_rect(cr, menu.x + inset, menu.y + inset, menu.width - inset * 2, menu.height - inset * 2, corner_radius);
-    set_color(cr, menu_color);
+    set_color(cr, pill_color);
     cairo_fill_preserve(cr);
     set_color(cr, menu_border);
     cairo_set_line_width(cr, border_width);

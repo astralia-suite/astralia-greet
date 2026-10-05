@@ -26,9 +26,8 @@ SessionPicker::SessionPicker() {
     dropdown_.max_items = defaults::max_items;
     dropdown_.color = config::muted;
     dropdown_.focus_color = config::accent;
-    dropdown_.menu_color = config::field;
-    dropdown_.menu_border = config::field_border;
     dropdown_.pill_color = defaults::pill_color;
+    dropdown_.menu_border = config::field_border;
 }
 
 void SessionPicker::layout(int width, int height) {

@@ -25,7 +25,6 @@ struct Dropdown {
     double border_width = 0.0;
     config::Color color;
     config::Color focus_color;
-    config::Color menu_color;
     config::Color menu_border;
     config::Color pill_color;
 
