@@ -28,7 +28,7 @@ SessionPicker::SessionPicker() {
     dropdown_.color = config::muted;
     dropdown_.focus_color = config::accent;
     dropdown_.pill_color = defaults::pill_color;
-    dropdown_.menu_border = config::field_border;
+    dropdown_.menu_border = config::accent;
     dropdown_.icon = render::icon::session;
 }
 

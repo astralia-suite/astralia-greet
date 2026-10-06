@@ -10,7 +10,7 @@ inline constexpr int max_items = 8;
 inline constexpr int item_height = 40;
 inline constexpr int menu_gap = 4;
 inline constexpr double corner_radius = 10.0;
-inline constexpr double border_width = 5.0;
+inline constexpr double border_width = 2.0;
 inline constexpr int indicator_size = 16;
 inline constexpr int indicator_gap = 8;
 
