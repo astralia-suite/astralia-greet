@@ -38,17 +38,22 @@ Rect Dropdown::bounds(const Rect &button, bool open, std::size_t total, int scre
 
 void Dropdown::draw_button(cairo_t *cr, const Rect &button, std::string_view label, const config::Color &text_color) const {
     int padding = button.height / 2;
-    int limit = std::max(0, button.width - padding * 2 - indicator_gap - indicator_size);
+    int lead = icon ? indicator_size + indicator_gap : 0;
+    int limit = std::max(0, button.width - padding * 2 - lead - indicator_gap - indicator_size);
     int width = std::min(measure_text(cr, label, font).width, limit);
-    int content = width + indicator_gap + indicator_size;
+    int content = lead + width + indicator_gap + indicator_size;
     int x = static_cast<int>(button.center_x()) - content / 2;
     double inset = border_width / 2.0;
-    rounded_rect(cr, x - padding + inset, button.y + inset, content + padding * 2 - inset * 2, button.height - inset * 2, button.height / 2.0 - inset);
+    rounded_rect(cr, button.x + inset, button.y + inset, button.width - inset * 2, button.height - inset * 2, button.height / 2.0 - inset);
     set_color(cr, pill_color);
     cairo_fill_preserve(cr);
     set_color(cr, menu_border);
     cairo_set_line_width(cr, border_width);
     cairo_stroke(cr);
+    if (icon) {
+        draw_text(cr, icon, indicator_font, text_color, {x, button.y, indicator_size, button.height}, TextAlign::Center);
+        x += lead;
+    }
     draw_text(cr, label, font, text_color, {x, button.y, width, button.height}, TextAlign::Left);
     draw_text(cr, icon::chevron_up, indicator_font, text_color, {x + width + indicator_gap, button.y, indicator_size, button.height}, TextAlign::Center);
 }

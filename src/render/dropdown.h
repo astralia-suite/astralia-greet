@@ -16,6 +16,7 @@ namespace render {
 struct Dropdown {
     std::string font;
     std::string indicator_font;
+    const char *icon = nullptr;
     int indicator_size = 0;
     int indicator_gap = 0;
     int max_items = 0;

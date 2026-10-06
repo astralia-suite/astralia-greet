@@ -5,6 +5,7 @@
 
 #include "config/session_picker_config.h"
 
+#include "render/icons.h"
 #include "render/text.h"
 
 namespace modules {
@@ -28,6 +29,7 @@ SessionPicker::SessionPicker() {
     dropdown_.focus_color = config::accent;
     dropdown_.pill_color = defaults::pill_color;
     dropdown_.menu_border = config::field_border;
+    dropdown_.icon = render::icon::session;
 }
 
 void SessionPicker::layout(int width, int height) {

@@ -6,6 +6,7 @@
 
 #include "config/user_menu_config.h"
 
+#include "render/icons.h"
 #include "render/text.h"
 
 namespace modules {
@@ -18,6 +19,7 @@ UserMenu::UserMenu() {
     dropdown_.focus_color = config::accent;
     dropdown_.pill_color = defaults::pill_color;
     dropdown_.menu_border = config::field_border;
+    dropdown_.icon = render::icon::user;
 }
 
 void UserMenu::layout(int width, int height) {

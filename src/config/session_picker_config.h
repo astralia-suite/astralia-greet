@@ -5,7 +5,7 @@
 namespace config::session_picker {
 
 // Layout
-inline constexpr WidgetGeometry geometry{Anchor::Bottom, -110, -16, 260, 44};
+inline constexpr WidgetGeometry geometry{Anchor::Bottom, -130, -16, 240, 44};
 inline constexpr int max_items = 8;
 inline constexpr int item_height = 40;
 inline constexpr int menu_gap = 4;

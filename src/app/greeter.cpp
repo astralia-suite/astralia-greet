@@ -261,14 +261,14 @@ void Greeter::handle_key(const service::KeyEvent &key) {
 void Greeter::handle_clock_key(const service::KeyEvent &key) {
     switch (key.keysym) {
     case XKB_KEY_Up:
-    case XKB_KEY_Left:
-        state_.focus = Focus::Session;
-        step(-1);
-        break;
     case XKB_KEY_Down:
-    case XKB_KEY_Right:
         state_.focus = Focus::Session;
-        step(1);
+        step(key.keysym == XKB_KEY_Up ? -1 : 1);
+        break;
+    case XKB_KEY_Left:
+    case XKB_KEY_Right:
+        state_.focus = Focus::Password;
+        step(key.keysym == XKB_KEY_Left ? -1 : 1);
         break;
     case XKB_KEY_Escape:
         state_.message.clear();
@@ -314,6 +314,7 @@ void Greeter::handle_click(int x, int y) {
     auto previous_user = state_.user_index;
     bool session_menu_was_open = state_.session_menu_open;
     bool user_menu_was_open = state_.user_menu_open;
+    damage_widgets(); // pre-click bounds: click() may shrink them before after_input() runs
     for (auto it = modules_.rbegin(); it != modules_.rend(); ++it) {
         auto &module = *it;
         if (!module->is_backdrop() && module->bounds().contains(x, y) && module->click(x, y, state_)) {
