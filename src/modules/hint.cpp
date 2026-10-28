@@ -1,11 +1,12 @@
 #include "modules/hint.h"
 
 #include "config/hint_config.h"
+#include "config/style_config.h"
 
 namespace modules {
 
 Hint::Hint()
-    : geometry_(config::hint::geometry), font_(render::text_font(config::hint::font_size)), caps_lock_text_(config::hint::caps_lock_text), idle_text_(config::hint::idle_text), show_layout_(config::hint::show_layout), align_(render::TextAlign::Center), info_color_(config::muted), warn_color_(config::hint::warn_color), error_color_(config::error) {}
+    : geometry_(config::hint::geometry), font_(render::text_font(config::hint::font_size)), caps_lock_text_(config::hint::caps_lock_text), idle_text_(config::hint::idle_text), show_layout_(config::hint::show_layout), align_(render::TextAlign::Center), info_color_(config::style::text_dim), warn_color_(config::style::warn), error_color_(config::style::critical) {}
 
 void Hint::layout(int width, int height) {
     rect_ = render::place(geometry_, width, height, render::ui_scale(width, height));

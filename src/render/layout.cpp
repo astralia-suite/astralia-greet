@@ -102,6 +102,32 @@ Rect Rect::padded(int amount) const {
     return {x - amount, y - amount, width + amount * 2, height + amount * 2};
 }
 
+bool Box::contains(double px, double py) const {
+    return w > 0.0 && h > 0.0 && px >= x && py >= y && px < x + w && py < y + h;
+}
+
+Box Box::united(const Box &other) const {
+    if (w <= 0.0 || h <= 0.0) {
+        return other;
+    }
+    if (other.w <= 0.0 || other.h <= 0.0) {
+        return *this;
+    }
+    double left = std::min(x, other.x);
+    double top = std::min(y, other.y);
+    return {left, top, std::max(x + w, other.x + other.w) - left, std::max(y + h, other.y + other.h) - top};
+}
+
+Rect Box::bounding_rect() const {
+    int left = static_cast<int>(std::floor(x));
+    int top = static_cast<int>(std::floor(y));
+    return {left, top, static_cast<int>(std::ceil(x + w)) - left, static_cast<int>(std::ceil(y + h)) - top};
+}
+
+Box to_box(const Rect &rect) {
+    return {static_cast<double>(rect.x), static_cast<double>(rect.y), static_cast<double>(rect.width), static_cast<double>(rect.height)};
+}
+
 std::vector<Rect> merge_overlapping(std::vector<Rect> rects) {
     std::erase_if(rects, [](const Rect &rect) { return rect.empty(); });
     bool merged = true;

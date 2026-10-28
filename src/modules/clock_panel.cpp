@@ -1,14 +1,21 @@
 #include "modules/clock_panel.h"
 
 #include "config/clock_panel_config.h"
+#include "config/style_config.h"
 
-#include "render/canvas.h"
+#include "render/sticker.h"
+#include "render/style.h"
 
 namespace modules {
 
 void ClockPanel::layout(int width, int height) {
-    scale_ = render::ui_scale(width, height);
-    rect_ = render::place(config::clock_panel::geometry, width, height, scale_);
+    auto scale = render::ui_scale(width, height);
+    rect_ = render::place(config::clock_panel::geometry, width, height, scale);
+    auto style = render::make_style(scale);
+    card_.reset(cairo_image_surface_create(CAIRO_FORMAT_ARGB32, rect_.width, rect_.height));
+    cairo_t *cr = cairo_create(card_.get());
+    render::sticker(cr, {0.0, 0.0, static_cast<double>(rect_.width), static_cast<double>(rect_.height)}, style.radius_card, config::style::surface, config::style::ink, style.border_thick, style.shadow_offset, style.ring_width);
+    cairo_destroy(cr);
 }
 
 render::Rect ClockPanel::bounds() const {
@@ -20,18 +27,11 @@ bool ClockPanel::visible(const app::GreeterState &state) const {
 }
 
 void ClockPanel::draw(cairo_t *cr, const app::GreeterState &state) {
-    namespace defaults = config::clock_panel;
-    if (!visible(state)) {
+    if (!visible(state) || !card_) {
         return;
     }
-    double border = render::line_width(defaults::border_width, scale_);
-    double inset = border / 2.0;
-    render::rounded_rect(cr, rect_.x + inset, rect_.y + inset, rect_.width - inset * 2, rect_.height - inset * 2, render::scaled(defaults::corner_radius, scale_));
-    render::set_color(cr, defaults::fill);
-    cairo_fill_preserve(cr);
-    render::set_color(cr, config::accent);
-    cairo_set_line_width(cr, border);
-    cairo_stroke(cr);
+    cairo_set_source_surface(cr, card_.get(), rect_.x, rect_.y);
+    cairo_paint(cr);
 }
 
 } // namespace modules

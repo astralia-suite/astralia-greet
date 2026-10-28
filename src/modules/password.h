@@ -7,6 +7,7 @@
 #include "config/theme_config.h"
 
 #include "render/canvas.h"
+#include "render/style.h"
 
 namespace modules {
 
@@ -19,23 +20,23 @@ class Password : public app::Module {
     void draw(cairo_t *cr, const app::GreeterState &state) override;
     bool visible(const app::GreeterState &state) const override;
     bool click(int x, int y, app::GreeterState &state) override;
+    bool hover(int x, int y, const app::GreeterState &state) override;
 
   private:
     config::WidgetGeometry geometry_;
     render::SurfacePtr echo_image_;
     render::SurfacePtr echo_;
+    render::Style style_;
     double scale_ = 1.0;
     int echo_size_ = 0;
     render::Rect rect_;
+    render::Rect button_;
     std::string font_;
+    std::string icon_font_;
     std::string mask_;
     std::string placeholder_;
     std::string busy_text_;
-    config::Color text_color_;
-    config::Color fill_;
-    config::Color border_;
-    config::Color focus_border_;
-    config::Color muted_;
+    bool hovered_ = false;
 };
 
 } // namespace modules

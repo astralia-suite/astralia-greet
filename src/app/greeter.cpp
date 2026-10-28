@@ -34,6 +34,7 @@ GreeterState initial_state(const config::Settings &settings, const service::User
     state.users = users.users();
     state.sessions = sessions.sessions();
     state.password.reserve(256);
+    state.wifi_password.reserve(256);
     if (settings.general.remember_last_user) {
         if (auto last = store.last_user()) {
             auto found = std::ranges::find(state.users, *last, &service::User::name);
@@ -70,7 +71,7 @@ bool is_printable(const service::KeyEvent &key) {
 } // namespace
 
 Greeter::Greeter(core::EventLoop &loop, const config::Settings &settings, Mode mode)
-    : loop_(loop), settings_(settings), mode_(mode), seat_(loop), input_(loop), window_(loop), store_(config::state_path) {}
+    : loop_(loop), settings_(settings), mode_(mode), seat_(loop), input_(loop), window_(loop), network_(loop), bluetooth_(loop), store_(config::state_path) {}
 
 Greeter::~Greeter() {
     core::secure_clear(state_.password);
@@ -92,6 +93,7 @@ bool Greeter::start() {
     state_ = initial_state(settings_, users_, sessions_, store_);
     select_session_for_user();
     refresh_keyboard();
+    start_radios();
     active_ = true;
     damage_all();
     flush();
@@ -128,6 +130,7 @@ bool Greeter::start_native() {
     }
     input_.on_key = [this](const service::KeyEvent &key) { handle_key(key); };
     input_.on_click = [this](int x, int y) { handle_click(x, y); };
+    input_.on_scroll = [this](int x, int y, double notches) { handle_scroll(x, y, notches); };
     input_.on_pointer_motion = [this](int x, int y) {
         display_.move_cursor(x, y);
         handle_motion(x, y);
@@ -142,6 +145,7 @@ bool Greeter::start_window() {
     }
     window_.on_key = [this](const service::KeyEvent &key) { handle_key(key); };
     window_.on_click = [this](int x, int y) { handle_click(x, y); };
+    window_.on_scroll = [this](int x, int y, double notches) { handle_scroll(x, y, notches); };
     window_.on_pointer_motion = [this](int x, int y) { handle_motion(x, y); };
     window_.on_resize = [this](int width, int height) {
         if (resize(width, height)) {
@@ -217,10 +221,18 @@ void Greeter::handle_key(const service::KeyEvent &key) {
         loop_.quit();
         return;
     }
-    if ((state_.session_menu_open || state_.user_menu_open) && (sym == XKB_KEY_Return || sym == XKB_KEY_KP_Enter || sym == XKB_KEY_Escape)) {
-        state_.session_menu_open = false;
-        state_.user_menu_open = false;
+    if (state_.wifi_dialog_open()) {
+        handle_wifi_key(key);
         after_input(previous_user);
+        return;
+    }
+    if (any_menu_open() && (sym == XKB_KEY_Return || sym == XKB_KEY_KP_Enter || sym == XKB_KEY_Escape)) {
+        close_menus();
+        after_input(previous_user);
+        return;
+    }
+    if ((state_.network_menu_open || state_.bluetooth_menu_open) && (sym == XKB_KEY_Up || sym == XKB_KEY_Down)) {
+        scroll_menus(sym == XKB_KEY_Up ? -1.0 : 1.0);
         return;
     }
     if (state_.view == View::Clock) {
@@ -294,17 +306,95 @@ void Greeter::show_login() {
     state_.view = View::Login;
     state_.focus = Focus::Password;
     state_.message.clear();
-    state_.session_menu_open = false;
-    state_.user_menu_open = false;
+    close_menus();
 }
 
 void Greeter::show_clock() {
     core::secure_clear(state_.password);
     state_.message.clear();
-    state_.session_menu_open = false;
-    state_.user_menu_open = false;
+    close_menus();
     state_.focus = Focus::Password;
     state_.view = View::Clock;
+}
+
+bool Greeter::any_menu_open() const {
+    return state_.session_menu_open || state_.user_menu_open || state_.network_menu_open || state_.bluetooth_menu_open;
+}
+
+void Greeter::close_menus() {
+    state_.clear_wifi_dialog();
+    state_.session_menu_open = false;
+    state_.user_menu_open = false;
+    state_.network_menu_open = false;
+    state_.bluetooth_menu_open = false;
+}
+
+void Greeter::sync_scan() {
+    if (state_.network_menu_open == scanning_) {
+        return;
+    }
+    scanning_ = state_.network_menu_open;
+    if (scanning_) {
+        network_.begin_scan();
+    } else {
+        network_.end_scan();
+    }
+}
+
+void Greeter::handle_wifi_key(const service::KeyEvent &key) {
+    switch (key.keysym) {
+    case XKB_KEY_Return:
+    case XKB_KEY_KP_Enter:
+        if (core::utf8_length(state_.wifi_password) >= state_.wifi_min_length) {
+            state_.request = Request::ConnectNetwork;
+            state_.request_target = state_.wifi_ap;
+        }
+        break;
+    case XKB_KEY_Escape:
+        state_.clear_wifi_dialog();
+        break;
+    case XKB_KEY_BackSpace:
+        core::utf8_pop_back(state_.wifi_password);
+        break;
+    default:
+        if (key.ctrl && (key.keysym == XKB_KEY_u || key.keysym == XKB_KEY_U)) {
+            core::secure_clear(state_.wifi_password);
+        } else if (is_printable(key)) {
+            state_.wifi_password += key.text;
+        }
+        break;
+    }
+}
+
+void Greeter::start_radios() {
+    network_.on_change = [this] { on_radio_change(); };
+    bluetooth_.on_change = [this] { on_radio_change(); };
+    if (!network_.start()) {
+        core::warn("network status is unavailable");
+    }
+    if (!bluetooth_.start()) {
+        core::warn("bluetooth status is unavailable");
+    }
+    state_.network = network_.snapshot();
+    state_.bluetooth = bluetooth_.snapshot();
+}
+
+void Greeter::on_radio_change() {
+    state_.network = network_.snapshot();
+    state_.bluetooth = bluetooth_.snapshot();
+    state_.network_menu_open = state_.network_menu_open && state_.network.available;
+    if (!state_.network_menu_open) {
+        state_.clear_wifi_dialog();
+    }
+    state_.bluetooth_menu_open = state_.bluetooth_menu_open && state_.bluetooth.available;
+    for (auto &module : modules_) {
+        auto before = module->bounds();
+        if (module->update(state_) && state_.view == View::Clock) {
+            damage(before);
+            damage(module->bounds());
+        }
+    }
+    flush();
 }
 
 void Greeter::handle_click(int x, int y) {
@@ -315,10 +405,17 @@ void Greeter::handle_click(int x, int y) {
     bool session_menu_was_open = state_.session_menu_open;
     bool user_menu_was_open = state_.user_menu_open;
     damage_widgets(); // pre-click bounds: click() may shrink them before after_input() runs
+    const Module *consumer = nullptr;
     for (auto it = modules_.rbegin(); it != modules_.rend(); ++it) {
         auto &module = *it;
         if (!module->is_backdrop() && module->bounds().contains(x, y) && module->click(x, y, state_)) {
+            consumer = module.get();
             break;
+        }
+    }
+    for (auto &module : modules_) {
+        if (module.get() != consumer) {
+            module->clicked_outside(state_);
         }
     }
     if (session_menu_was_open) {
@@ -328,6 +425,29 @@ void Greeter::handle_click(int x, int y) {
         state_.user_menu_open = false;
     }
     after_input(previous_user);
+}
+
+void Greeter::handle_scroll(int x, int y, double notches) {
+    if (!active_ || state_.busy || worker_ > 0) {
+        return;
+    }
+    for (auto it = modules_.rbegin(); it != modules_.rend(); ++it) {
+        auto &module = *it;
+        if (!module->is_backdrop() && module->bounds().contains(x, y) && module->scroll(notches, state_)) {
+            damage(module->bounds());
+            break;
+        }
+    }
+    flush();
+}
+
+void Greeter::scroll_menus(double notches) {
+    for (auto &module : modules_) {
+        if (module->scroll(notches, state_)) {
+            damage(module->bounds());
+        }
+    }
+    flush();
 }
 
 void Greeter::handle_motion(int x, int y) {
@@ -353,6 +473,7 @@ void Greeter::after_input(std::size_t previous_user) {
         shown_view_ = state_.view;
         damage_all();
     }
+    sync_scan();
     damage_widgets();
     flush();
     process_request();
@@ -372,7 +493,8 @@ void Greeter::step(int direction) {
 
 void Greeter::process_request() {
     auto request = std::exchange(state_.request, Request::None);
-    if (mode_ == Mode::Window && request != Request::None && request != Request::Login) {
+    auto target = std::exchange(state_.request_target, std::string{});
+    if (mode_ == Mode::Window && (request == Request::Reboot || request == Request::PowerOff || request == Request::Suspend)) {
         core::info("test window: ignoring power request");
         return;
     }
@@ -388,6 +510,25 @@ void Greeter::process_request() {
         break;
     case Request::Suspend:
         power_.suspend();
+        break;
+    case Request::ToggleWifi:
+        network_.set_wifi_enabled(!state_.network.wifi_enabled);
+        break;
+    case Request::ActivateNetwork:
+        network_.toggle(target);
+        break;
+    case Request::ToggleBluetooth:
+        bluetooth_.set_powered(!state_.bluetooth.powered);
+        break;
+    case Request::ToggleBluetoothDevice:
+        bluetooth_.toggle_device(target);
+        break;
+    case Request::ConnectNetwork:
+        network_.connect(target, state_.wifi_password);
+        state_.clear_wifi_dialog();
+        break;
+    case Request::ScanNetworks:
+        network_.scan();
         break;
     case Request::None:
         break;
@@ -550,8 +691,8 @@ void Greeter::on_session_end() {
     core::secure_clear(state_.password);
     state_.message.clear();
     state_.busy = false;
-    state_.session_menu_open = false;
-    state_.user_menu_open = false;
+    close_menus();
+    sync_scan();
     state_.focus = Focus::Password;
     state_.view = View::Clock;
     shown_view_ = View::Clock;
@@ -622,8 +763,8 @@ void Greeter::deactivate() {
         return;
     }
     active_ = false;
-    state_.session_menu_open = false;
-    state_.user_menu_open = false;
+    close_menus();
+    sync_scan();
     input_.suspend();
     display_.drop_master();
 }
@@ -706,6 +847,10 @@ bool render_preview(const config::Settings &settings, const std::filesystem::pat
     store.load();
     auto state = initial_state(settings, users, sessions, store);
     state.password = "preview";
+    state.network.available = state.network.wifi_present = state.network.wifi_enabled = true;
+    state.network.link = service::NetworkLink::Wifi;
+    state.network.entries = {{"/preview/network", "/preview/ap", "Home", 3, service::NetworkSecurity::Psk, true, true, false, true}};
+    state.bluetooth = {true, true, {{"/preview/device", "Headphones", true, false}}};
     auto modules = create_modules(settings.power);
     render::set_text_scale(render::ui_scale(width, height));
     for (auto &module : modules) {

@@ -216,6 +216,8 @@ void WindowService::handle(xcb_generic_event_t *event) {
         auto *button = reinterpret_cast<xcb_button_press_event_t *>(event);
         if (button->detail == XCB_BUTTON_INDEX_1 && on_click) {
             on_click(button->event_x, button->event_y);
+        } else if ((button->detail == XCB_BUTTON_INDEX_4 || button->detail == XCB_BUTTON_INDEX_5) && on_scroll) {
+            on_scroll(button->event_x, button->event_y, button->detail == XCB_BUTTON_INDEX_4 ? -1.0 : 1.0);
         }
         break;
     }

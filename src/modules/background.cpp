@@ -3,6 +3,7 @@
 #include <filesystem>
 
 #include "config/background_config.h"
+#include "config/style_config.h"
 
 #include "core/log.h"
 
@@ -44,7 +45,8 @@ void Background::draw(cairo_t *cr, const app::GreeterState &state) {
     cairo_set_source_surface(cr, surface_.get(), 0, 0);
     cairo_paint(cr);
     if (state.view == app::View::Login) {
-        cairo_set_source_rgba(cr, 0, 0, 0, config::background::login_dim);
+        const auto &dim = config::style::window_backdrop;
+        cairo_set_source_rgba(cr, dim.r, dim.g, dim.b, dim.a);
         cairo_paint(cr);
     }
 }

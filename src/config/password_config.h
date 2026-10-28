@@ -5,10 +5,10 @@
 namespace config::password {
 
 // Layout
-inline constexpr WidgetGeometry geometry{Anchor::Center, 0, 0, 300, 46};
-inline constexpr double border_width = 1.5;
-inline constexpr double focus_border_width = 2.0;
-inline constexpr int caret_gap = 3;
+inline constexpr WidgetGeometry geometry{Anchor::Center, 0, 0, 380, 56};
+inline constexpr double border_width = 5.0;
+inline constexpr int button_size = 44;
+inline constexpr int icon_size = 26;
 
 // Echo
 inline constexpr const char *echo_image = ASTRALIA_GREET_DATA_DIR "/electro.png";
@@ -16,7 +16,7 @@ inline constexpr const char *source_echo_image = ASTRALIA_GREET_SOURCE_DIR "/ass
 inline constexpr int echo_size = 18;
 
 // Typography, in points
-inline constexpr int font_size = 13;
+inline constexpr int font_size = 14;
 
 // Text
 inline constexpr const char *mask = "•";

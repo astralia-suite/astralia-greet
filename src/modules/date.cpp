@@ -4,11 +4,12 @@
 #include <ctime>
 
 #include "config/date_config.h"
+#include "config/style_config.h"
 
 namespace modules {
 
 Date::Date()
-    : geometry_(config::date::geometry), format_(config::date::format), font_(render::text_font(config::date::font_size)), color_(config::fg), align_(render::TextAlign::Center) {}
+    : geometry_(config::date::geometry), format_(config::date::format), font_(render::text_font(config::date::font_size, true)), color_(config::style::text), align_(render::TextAlign::Center) {}
 
 void Date::layout(int width, int height) {
     rect_ = render::place(geometry_, width, height, render::ui_scale(width, height));

@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "config/style_config.h"
 #include "config/user_menu_config.h"
 
 #include "render/icons.h"
@@ -15,10 +16,6 @@ UserMenu::UserMenu() {
     namespace defaults = config::user_menu;
     dropdown_.font = render::text_font(defaults::font_size);
     dropdown_.max_items = defaults::max_items;
-    dropdown_.color = config::muted;
-    dropdown_.focus_color = config::accent;
-    dropdown_.pill_color = defaults::pill_color;
-    dropdown_.menu_border = config::accent;
     dropdown_.icon = render::icon::user;
 }
 
@@ -31,8 +28,8 @@ void UserMenu::layout(int width, int height) {
     dropdown_.indicator_gap = render::scaled(defaults::indicator_gap, scale);
     dropdown_.item_height = std::max(1, render::scaled(defaults::item_height, scale));
     dropdown_.menu_gap = render::scaled(defaults::menu_gap, scale);
-    dropdown_.corner_radius = render::scaled(defaults::corner_radius, scale);
-    dropdown_.border_width = render::line_width(defaults::border_width, scale);
+    dropdown_.row_gap = render::scaled(defaults::row_gap, scale);
+    dropdown_.style = render::make_style(scale);
     screen_height_ = height;
 }
 
@@ -50,7 +47,7 @@ void UserMenu::draw(cairo_t *cr, const app::GreeterState &state) {
     if (!visible(state)) {
         return;
     }
-    dropdown_.draw_button(cr, rect_, state.users[state.user_index].display_name, dropdown_.color);
+    dropdown_.draw_button(cr, rect_, state.users[state.user_index].display_name, false);
     if (open_) {
         std::vector<std::string> labels;
         for (const auto &user : state.users) {

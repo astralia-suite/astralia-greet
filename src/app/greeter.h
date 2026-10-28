@@ -19,9 +19,11 @@
 #include "render/layout.h"
 
 #include "service/auth_service.h"
+#include "service/bluetooth_service.h"
 #include "service/display_service.h"
 #include "service/input_service.h"
 #include "service/launch_service.h"
+#include "service/network_service.h"
 #include "service/power_service.h"
 #include "service/seat_service.h"
 #include "service/session_service.h"
@@ -54,7 +56,15 @@ class Greeter {
     void handle_clock_key(const service::KeyEvent &key);
     void show_login();
     void show_clock();
+    bool any_menu_open() const;
+    void close_menus();
+    void sync_scan();
+    void handle_wifi_key(const service::KeyEvent &key);
+    void start_radios();
+    void on_radio_change();
     void handle_click(int x, int y);
+    void handle_scroll(int x, int y, double notches);
+    void scroll_menus(double notches);
     void handle_motion(int x, int y);
     void step(int direction);
     void after_input(std::size_t previous_user);
@@ -90,6 +100,8 @@ class Greeter {
     service::SessionService sessions_;
     service::PowerService power_;
     service::LaunchService launch_;
+    service::NetworkService network_;
+    service::BluetoothService bluetooth_;
     StateStore store_;
     std::unique_ptr<render::Canvas> canvas_;
     std::vector<std::unique_ptr<Module>> modules_;
@@ -98,6 +110,7 @@ class Greeter {
     View shown_view_ = View::Clock;
     bool active_ = false;
     bool managed_ = false;
+    bool scanning_ = false;
     int session_vt_ = 0;
     pid_t worker_ = 0;
     std::chrono::steady_clock::time_point session_started_;

@@ -24,6 +24,19 @@ struct Rect {
     Rect padded(int amount) const;
 };
 
+struct Box {
+    double x = 0.0;
+    double y = 0.0;
+    double w = 0.0;
+    double h = 0.0;
+
+    bool contains(double px, double py) const;
+    Box united(const Box &other) const;
+    Rect bounding_rect() const;
+};
+
+Box to_box(const Rect &rect);
+
 struct Placement {
     double scale_x = 1.0;
     double scale_y = 1.0;

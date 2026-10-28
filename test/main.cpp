@@ -9,8 +9,10 @@ void test_session_detect();
 void test_user_filter();
 void test_xauth();
 void test_launch_env();
+void test_radio();
 void test_state_store();
 void test_layout();
+void test_scroll();
 void test_image();
 
 int main() {
@@ -26,8 +28,10 @@ int main() {
         {"user_filter", test_user_filter},
         {"xauth", test_xauth},
         {"launch_env", test_launch_env},
+        {"radio", test_radio},
         {"state_store", test_state_store},
         {"layout", test_layout},
+        {"scroll", test_scroll},
         {"image", test_image},
     };
     for (const auto &c : cases) {

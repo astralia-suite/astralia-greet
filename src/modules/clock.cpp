@@ -4,6 +4,7 @@
 #include <ctime>
 
 #include "config/clock_config.h"
+#include "config/style_config.h"
 
 namespace modules {
 
@@ -30,7 +31,7 @@ bool shows_seconds(const std::string &format) {
 } // namespace
 
 Clock::Clock()
-    : geometry_(config::clock::geometry), hour_format_(config::clock::hour_format), minute_format_(config::clock::minute_format), font_(render::text_font(config::clock::time_size)), hour_color_(config::accent), minute_color_(config::fg), align_(render::TextAlign::Center) {
+    : geometry_(config::clock::geometry), hour_format_(config::clock::hour_format), minute_format_(config::clock::minute_format), font_(render::text_font(config::clock::time_size, true)), hour_color_(config::style::text), minute_color_(config::style::lavender), align_(render::TextAlign::Center) {
     seconds_ = shows_seconds(hour_format_) || shows_seconds(minute_format_);
 }
 

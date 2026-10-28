@@ -48,6 +48,7 @@ class InputService {
     std::function<void(const KeyEvent &)> on_key;
     std::function<void(int, int)> on_pointer_motion;
     std::function<void(int, int)> on_click;
+    std::function<void(int, int, double)> on_scroll;
 
   private:
     void dispatch();

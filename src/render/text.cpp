@@ -3,6 +3,7 @@
 #include <format>
 #include <pango/pangocairo.h>
 #include <string>
+#include <unordered_map>
 
 #include "render/canvas.h"
 #include "render/icons.h"
@@ -11,12 +12,19 @@ namespace render {
 
 namespace {
 
+const PangoFontDescription *cached_description(std::string_view font) {
+    static std::unordered_map<std::string, PangoFontDescription *> cache;
+    std::string key(font);
+    auto found = cache.find(key);
+    if (found == cache.end()) {
+        found = cache.emplace(key, pango_font_description_from_string(key.c_str())).first;
+    }
+    return found->second;
+}
+
 PangoLayout *make_layout(cairo_t *cr, std::string_view text, std::string_view font) {
     PangoLayout *layout = pango_cairo_create_layout(cr);
-    std::string description(font);
-    PangoFontDescription *desc = pango_font_description_from_string(description.c_str());
-    pango_layout_set_font_description(layout, desc);
-    pango_font_description_free(desc);
+    pango_layout_set_font_description(layout, cached_description(font));
     pango_layout_set_text(layout, text.data(), static_cast<int>(text.size()));
     return layout;
 }

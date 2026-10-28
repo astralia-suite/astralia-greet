@@ -1,10 +1,12 @@
 #include "app/module_registry.h"
 
 #include "modules/background.h"
+#include "modules/bluetooth.h"
 #include "modules/clock.h"
 #include "modules/clock_panel.h"
 #include "modules/date.h"
 #include "modules/hint.h"
+#include "modules/network.h"
 #include "modules/password.h"
 #include "modules/power.h"
 #include "modules/session_picker.h"
@@ -25,6 +27,8 @@ std::vector<std::unique_ptr<Module>> create_modules(const config::PowerSettings 
     }
     list.push_back(std::make_unique<modules::UserMenu>());
     list.push_back(std::make_unique<modules::SessionPicker>());
+    list.push_back(std::make_unique<modules::Network>());
+    list.push_back(std::make_unique<modules::Bluetooth>());
     return list;
 }
 

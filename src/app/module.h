@@ -30,6 +30,16 @@ class Module {
         return false;
     }
 
+    virtual bool scroll(double, const GreeterState &) {
+        return false;
+    }
+
+    virtual void clicked_outside(GreeterState &) {}
+
+    virtual bool update(const GreeterState &) {
+        return false;
+    }
+
     virtual std::optional<std::chrono::milliseconds> next_tick() const {
         return std::nullopt;
     }

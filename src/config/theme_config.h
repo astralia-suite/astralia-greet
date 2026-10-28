@@ -37,14 +37,6 @@ struct WidgetGeometry {
 inline constexpr int reference_width = 1920;
 inline constexpr int reference_height = 1200;
 
-// Palette, mirrors astralia-shell-i3/src/core/palette.h: text, text_alpha65, accent, critical, text_alpha08, text_alpha20
-inline constexpr Color fg{240 / 255.0, 236 / 255.0, 249 / 255.0, 1.0};
-inline constexpr Color muted{240 / 255.0, 236 / 255.0, 249 / 255.0, 166 / 255.0};
-inline constexpr Color accent{155 / 255.0, 87 / 255.0, 244 / 255.0, 1.0};
-inline constexpr Color error{244 / 255.0, 71 / 255.0, 71 / 255.0, 1.0};
-inline constexpr Color field{240 / 255.0, 236 / 255.0, 249 / 255.0, 20 / 255.0};
-inline constexpr Color field_border{240 / 255.0, 236 / 255.0, 249 / 255.0, 51 / 255.0};
-
 // Font
 inline constexpr const char *font_family = "Comic Shanns Mono";
 inline constexpr int font_size = 12;

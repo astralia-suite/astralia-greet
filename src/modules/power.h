@@ -9,6 +9,8 @@
 #include "config/greet_config.h"
 #include "config/theme_config.h"
 
+#include "render/style.h"
+
 namespace modules {
 
 class Power : public app::Module {
@@ -31,8 +33,7 @@ class Power : public app::Module {
     std::vector<app::Request> actions_;
     int icon_size_ = 0;
     int spacing_ = 0;
-    std::string font_;
-    config::Color color_;
+    render::Style style_;
     std::optional<std::size_t> hovered_;
 };
 

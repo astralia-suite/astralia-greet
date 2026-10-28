@@ -28,6 +28,10 @@ void close_restricted(int fd, void *data) {
 
 constexpr libinput_interface interface{open_restricted, close_restricted};
 
+// libinput reports finger and continuous scrolling in pixel-like units, one wheel notch is about this many
+constexpr double scroll_units_per_notch = 15.0;
+constexpr double wheel_v120_per_notch = 120.0;
+
 const char *optional_string(const std::string &value) {
     return value.empty() ? nullptr : value.c_str();
 }
@@ -186,7 +190,8 @@ void InputService::dispatch() {
 }
 
 void InputService::handle(libinput_event *event) {
-    switch (libinput_event_get_type(event)) {
+    auto type = libinput_event_get_type(event);
+    switch (type) {
     case LIBINPUT_EVENT_DEVICE_ADDED: {
         libinput_device *device = libinput_event_get_device(event);
         if (libinput_device_config_tap_get_finger_count(device) > 0) {
@@ -224,6 +229,17 @@ void InputService::handle(libinput_event *event) {
         if (libinput_event_pointer_get_button(pointer) == BTN_LEFT && libinput_event_pointer_get_button_state(pointer) == LIBINPUT_BUTTON_STATE_PRESSED && on_click) {
             on_click(static_cast<int>(pointer_x_), static_cast<int>(pointer_y_));
         }
+        break;
+    }
+    case LIBINPUT_EVENT_POINTER_SCROLL_WHEEL:
+    case LIBINPUT_EVENT_POINTER_SCROLL_FINGER:
+    case LIBINPUT_EVENT_POINTER_SCROLL_CONTINUOUS: {
+        libinput_event_pointer *pointer = libinput_event_get_pointer_event(event);
+        if (!on_scroll || !libinput_event_pointer_has_axis(pointer, LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL)) {
+            break;
+        }
+        double notches = type == LIBINPUT_EVENT_POINTER_SCROLL_WHEEL ? libinput_event_pointer_get_scroll_value_v120(pointer, LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL) / wheel_v120_per_notch : libinput_event_pointer_get_scroll_value(pointer, LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL) / scroll_units_per_notch;
+        on_scroll(static_cast<int>(pointer_x_), static_cast<int>(pointer_y_), notches);
         break;
     }
     case LIBINPUT_EVENT_TOUCH_DOWN: {

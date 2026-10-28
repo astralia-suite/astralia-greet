@@ -4,9 +4,11 @@
 #include <utility>
 
 #include "config/power_config.h"
+#include "config/style_config.h"
 
 #include "render/icons.h"
 #include "render/text.h"
+#include "render/widgets.h"
 
 namespace modules {
 
@@ -21,19 +23,18 @@ Power::Power(const config::PowerSettings &power) {
     if (power.allow_poweroff) {
         actions_.push_back(app::Request::PowerOff);
     }
-    color_ = config::muted;
     auto count = static_cast<int>(actions_.size());
     geometry_ = defaults::geometry;
-    geometry_.width = count * defaults::icon_size + std::max(0, count - 1) * defaults::spacing;
-    geometry_.height = defaults::icon_size;
+    geometry_.width = count * defaults::box_size + std::max(0, count - 1) * defaults::spacing;
+    geometry_.height = defaults::box_size;
 }
 
 void Power::layout(int width, int height) {
     auto scale = render::ui_scale(width, height);
     rect_ = render::place(geometry_, width, height, scale);
-    icon_size_ = render::scaled(config::power::icon_size, scale);
+    icon_size_ = render::scaled(config::power::box_size, scale);
     spacing_ = render::scaled(config::power::spacing, scale);
-    font_ = render::icon_font(icon_size_);
+    style_ = render::make_style(scale);
 }
 
 render::Rect Power::bounds() const {
@@ -45,8 +46,7 @@ bool Power::visible(const app::GreeterState &state) const {
 }
 
 render::Rect Power::slot(std::size_t index) const {
-    int x = rect_.x + static_cast<int>(index) * (icon_size_ + spacing_);
-    return {x, static_cast<int>(rect_.center_y()) - icon_size_ / 2, icon_size_, icon_size_};
+    return {rect_.x + static_cast<int>(index) * (icon_size_ + spacing_), rect_.y, icon_size_, icon_size_};
 }
 
 void Power::draw(cairo_t *cr, const app::GreeterState &state) {
@@ -69,7 +69,7 @@ void Power::draw(cairo_t *cr, const app::GreeterState &state) {
             break;
         }
         if (icon) {
-            render::draw_text(cr, icon, font_, hovered_ == i ? config::power::hover_color : color_, slot(i), render::TextAlign::Center);
+            render::widgets::icon_button(cr, render::to_box(slot(i)), icon, config::style::text, style_, hovered_ == i);
         }
     }
 }

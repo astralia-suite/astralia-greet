@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "config/session_picker_config.h"
+#include "config/style_config.h"
 
 #include "render/icons.h"
 #include "render/text.h"
@@ -25,10 +26,6 @@ SessionPicker::SessionPicker() {
     namespace defaults = config::session_picker;
     dropdown_.font = render::text_font(defaults::font_size);
     dropdown_.max_items = defaults::max_items;
-    dropdown_.color = config::muted;
-    dropdown_.focus_color = config::accent;
-    dropdown_.pill_color = defaults::pill_color;
-    dropdown_.menu_border = config::accent;
     dropdown_.icon = render::icon::session;
 }
 
@@ -41,8 +38,8 @@ void SessionPicker::layout(int width, int height) {
     dropdown_.indicator_gap = render::scaled(defaults::indicator_gap, scale);
     dropdown_.item_height = std::max(1, render::scaled(defaults::item_height, scale));
     dropdown_.menu_gap = render::scaled(defaults::menu_gap, scale);
-    dropdown_.corner_radius = render::scaled(defaults::corner_radius, scale);
-    dropdown_.border_width = render::line_width(defaults::border_width, scale);
+    dropdown_.row_gap = render::scaled(defaults::row_gap, scale);
+    dropdown_.style = render::make_style(scale);
     screen_height_ = height;
 }
 
@@ -61,11 +58,10 @@ void SessionPicker::draw(cairo_t *cr, const app::GreeterState &state) {
         return;
     }
     if (state.sessions.empty()) {
-        render::draw_text(cr, config::session_picker::empty_text, dropdown_.font, config::error, rect_, render::TextAlign::Center);
+        render::draw_text(cr, config::session_picker::empty_text, dropdown_.font, config::style::critical, rect_, render::TextAlign::Center);
         return;
     }
-    auto color = state.focus == app::Focus::Session ? dropdown_.focus_color : dropdown_.color;
-    dropdown_.draw_button(cr, rect_, session_label(state.sessions[state.session_index]), color);
+    dropdown_.draw_button(cr, rect_, session_label(state.sessions[state.session_index]), state.focus == app::Focus::Session);
     if (open_) {
         std::vector<std::string> labels;
         for (const auto &session : state.sessions) {

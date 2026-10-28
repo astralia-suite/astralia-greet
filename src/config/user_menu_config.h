@@ -9,15 +9,11 @@ inline constexpr WidgetGeometry geometry{Anchor::Bottom, 130, -16, 240, 44};
 inline constexpr int max_items = 8;
 inline constexpr int item_height = 40;
 inline constexpr int menu_gap = 4;
-inline constexpr double corner_radius = 10.0;
-inline constexpr double border_width = 2.0;
+inline constexpr int row_gap = 4;
 inline constexpr int indicator_size = 16;
 inline constexpr int indicator_gap = 8;
 
 // Typography, in points
 inline constexpr int font_size = 17;
-
-// Colors
-inline constexpr Color pill_color{0.0, 0.0, 0.0, 0.7};
 
 } // namespace config::user_menu

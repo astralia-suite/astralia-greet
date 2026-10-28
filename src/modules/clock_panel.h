@@ -2,6 +2,8 @@
 
 #include "app/module.h"
 
+#include "render/canvas.h"
+
 namespace modules {
 
 class ClockPanel : public app::Module {
@@ -15,7 +17,7 @@ class ClockPanel : public app::Module {
 
   private:
     render::Rect rect_;
-    double scale_ = 1.0;
+    render::SurfacePtr card_;
 };
 
 } // namespace modules
