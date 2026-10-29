@@ -2,39 +2,44 @@ project(
   'astralia-greet',
   'cpp',
   version: '0.1.0',
-  default_options: ['cpp_std=c++23', 'warning_level=3', 'buildtype=release'],
+  default_options: [
+    'prefix=/usr',
+    'cpp_std=c++23',
+    'warning_level=3',
+    'buildtype=release',
+  ],
 )
 
-libdrm_dep     = dependency('libdrm')
-cairo_dep      = dependency('cairo')
+libdrm_dep = dependency('libdrm')
+cairo_dep = dependency('cairo')
 pangocairo_dep = dependency('pangocairo')
 fontconfig_dep = dependency('fontconfig')
-xkbcommon_dep  = dependency('xkbcommon')
-libinput_dep   = dependency('libinput')
-libudev_dep    = dependency('libudev')
+xkbcommon_dep = dependency('xkbcommon')
+libinput_dep = dependency('libinput')
+libudev_dep = dependency('libudev')
 libsystemd_dep = dependency('libsystemd')
-libjpeg_dep    = dependency('libjpeg')
-libpng_dep     = dependency('libpng')
-xcb_dep        = dependency('xcb')
-cairo_xcb_dep  = dependency('cairo-xcb')
+libjpeg_dep = dependency('libjpeg')
+libpng_dep = dependency('libpng')
+xcb_dep = dependency('xcb')
+cairo_xcb_dep = dependency('cairo-xcb')
 xkbcommon_x11_dep = dependency('xkbcommon-x11')
-libseat_dep    = dependency('libseat')
-xcursor_dep    = dependency('xcursor')
-pam_dep        = meson.get_compiler('cpp').find_library('pam')
+libseat_dep = dependency('libseat')
+xcursor_dep = dependency('xcursor')
+pam_dep = meson.get_compiler('cpp').find_library('pam')
 
-astralia_greet_inc      = include_directories('src')
-astralia_greet_test_inc = include_directories('.')
+inc = include_directories('src')
+test_inc = include_directories('.')
 
-astralia_greet_data_dir = get_option('prefix') / get_option('datadir') / 'astralia-greet'
+data_dir = get_option('prefix') / get_option('datadir') / 'astralia-greet'
 
 add_project_arguments(
-  '-DASTRALIA_GREET_DATA_DIR="' + astralia_greet_data_dir + '"',
-  '-DASTRALIA_GREET_VERSION="' + meson.project_version() + '"',
-  '-DASTRALIA_GREET_SOURCE_DIR="' + meson.project_source_root() + '"',
+  '-DASTRALIA_GREET_DATA_DIR="@0@"'.format(data_dir),
+  '-DASTRALIA_GREET_VERSION="@0@"'.format(meson.project_version()),
+  '-DASTRALIA_GREET_SOURCE_DIR="@0@"'.format(meson.project_source_root()),
   language: 'cpp',
 )
 
-astralia_greet_deps = [
+deps = [
   libdrm_dep,
   cairo_dep,
   pangocairo_dep,
@@ -53,7 +58,7 @@ astralia_greet_deps = [
   pam_dep,
 ]
 
-astralia_greet_sources = [
+sources = [
   'src/core/strings.cpp',
   'src/core/log.cpp',
   'src/core/file.cpp',
@@ -105,24 +110,24 @@ astralia_greet_sources = [
   'src/app/greeter.cpp',
 ]
 
-astralia_greet_lib = static_library(
+core = static_library(
   'astralia-greet-core',
-  astralia_greet_sources,
-  include_directories: astralia_greet_inc,
-  dependencies: astralia_greet_deps,
+  sources,
+  include_directories: inc,
+  dependencies: deps,
 )
 
 executable(
   'astralia-greet',
   'src/main.cpp',
-  link_with: astralia_greet_lib,
-  include_directories: astralia_greet_inc,
-  dependencies: astralia_greet_deps,
+  link_with: core,
+  include_directories: inc,
+  dependencies: deps,
   install: true,
   install_dir: get_option('bindir'),
 )
 
-astralia_greet_test = executable(
+unit = executable(
   'astralia-greet-test',
   'test/main.cpp',
   'test/core/test_strings.cpp',
@@ -137,15 +142,20 @@ astralia_greet_test = executable(
   'test/render/test_layout.cpp',
   'test/render/test_scroll.cpp',
   'test/render/test_image.cpp',
-  link_with: astralia_greet_lib,
-  include_directories: [astralia_greet_inc, astralia_greet_test_inc],
-  dependencies: astralia_greet_deps,
+  link_with: core,
+  include_directories: [inc, test_inc],
+  dependencies: deps,
 )
 
-test('astralia-greet', astralia_greet_test)
+test('astralia-greet', unit)
 
-install_data('assets/wallpaper.png', 'assets/electro.png', install_dir: astralia_greet_data_dir)
-install_subdir('assets/fonts', install_dir: astralia_greet_data_dir)
+install_data('assets/wallpaper.png', 'assets/electro.png', install_dir: data_dir)
+install_subdir('assets/fonts', install_dir: data_dir)
 install_data('assets/astralia-greet.service', install_dir: get_option('prefix') / 'lib' / 'systemd' / 'system')
-install_data('assets/pam/astralia-greet', 'assets/pam/astralia-greet-autologin', 'assets/pam/astralia-greet-greeter', install_dir: get_option('sysconfdir') / 'pam.d')
+install_data(
+  'assets/pam/astralia-greet',
+  'assets/pam/astralia-greet-autologin',
+  'assets/pam/astralia-greet-greeter',
+  install_dir: get_option('sysconfdir') / 'pam.d',
+)
 install_data('assets/sysusers/astralia-greet.conf', install_dir: get_option('prefix') / 'lib' / 'sysusers.d')
